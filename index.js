@@ -3,7 +3,6 @@ const httpServer = require('http').createServer(app);
 const io = require('socket.io')(httpServer, {
   cors: {
     origin: "http://localhost:4200",
-    methods: ["GET", "POST"]
   }
 });
 
