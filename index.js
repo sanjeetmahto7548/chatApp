@@ -1,11 +1,10 @@
 const app = require('express')();
 const httpServer = require('http').createServer(app);
 const io = require('socket.io')(httpServer, {
-  origins:'*:*',
-  // cors: {
-  //   origin: '*',
-  //   methods: ["GET", "POST"]
-  // }
+  cors: {
+    origin: "http://localhost:4200",
+    methods: ["GET", "POST"]
+  }
 });
 
 var onlineUsers = [];
