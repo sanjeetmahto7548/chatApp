@@ -13,11 +13,13 @@ io.on("connection", (socket) => {
 
   // Listen to chantMessage event sent by client and emit a chatMessage to the client
   socket.on("chat message", function (message) {
-    io.to(message.receiver).emit("chat message", message);
+    if(message.receiver !=""|| message.receiver !=undefined || message.receiver !=null){
+      io.to(message.receiver).emit("chat message", message);
+    }else{
+      io.to(socket.id).emit("Serverlog", "message.receiver is not available");
+    }
     console.log(message);
     //SendFromUserDataToDB(message);
-  },err=>{
-    console.log(err);
   });
 
   // Listen to notifyTyping event sent by client and emit a notifyTyping to the client
