@@ -16,6 +16,8 @@ io.on("connection", (socket) => {
     io.to(message.receiver).emit("chat message", message);
     console.log(message);
     //SendFromUserDataToDB(message);
+  },err=>{
+    console.log(err);
   });
 
   // Listen to notifyTyping event sent by client and emit a notifyTyping to the client
