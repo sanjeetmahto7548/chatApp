@@ -13,7 +13,7 @@ io.on("connection", (socket) => {
 
   // Listen to chantMessage event sent by client and emit a chatMessage to the client
   socket.on("chat message", function (message) {
-    io.emit("Serverlog", "message.receiver is not available");
+    io.emit("Serverlog","chat message:"+ message);
     if(message.receiver !=""|| message.receiver !=undefined || message.receiver !=null){
       io.to(message.receiver).emit("chat message", message);
     }else{
@@ -37,6 +37,7 @@ io.on("connection", (socket) => {
     onlineUsers.push(newUser);
     io.to(socket.id).emit("connect user", newUser);
     io.emit("onlineUsers", onlineUsers);
+    io.emit("Serverlog","onlineUsers:"+ onlineUsers);
   });
 
   socket.on("join-chat", function (Room) {
