@@ -15,7 +15,8 @@ io.on("connection", (socket) => {
   socket.on("chat message", function (message) {
     io.emit("Serverlog", message);
     if(message.receiver !=""|| message.receiver !=undefined || message.receiver !=null){
-      io.to(message.receiver).emit("chat message", message);
+      // io.to(message.receiver).emit("chat message", message);
+      io.emit("chat message", message);
     }else{
       io.emit("Serverlog", "message.receiver is not available");
     }
@@ -25,7 +26,7 @@ io.on("connection", (socket) => {
 
   // Listen to notifyTyping event sent by client and emit a notifyTyping to the client
   socket.on("on typing", function (sender, receiver) {
-    io.to(receiver.id).emit("on typing", sender, receiver);
+    io.to(receiver).emit("on typing", sender, receiver);
   });
 
   // Listen to newUser event sent by client and emit a newUser to the client with new list of online users
