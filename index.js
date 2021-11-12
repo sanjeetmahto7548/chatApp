@@ -15,7 +15,7 @@ io.on("connection", (socket) => {
   socket.on("chat message", function (message) {
     io.emit("Serverlog", message);
     // if(message.receiver !=""|| message.receiver !=undefined || message.receiver !=null){
-      io.to(message.receiver).emit("chat message", message);
+      io.emit("chat message" +message.receiver_SubID, message);
       // io.emit("chat message", message);
     // }else{
      //io.emit("Serverlog", "message.receiver is not available");
