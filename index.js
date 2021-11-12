@@ -2,7 +2,7 @@ const app = require("express")();
 const httpServer = require("http").createServer(app);
 const axios = require("axios");
 const io = require("socket.io")(httpServer, {
-  cors:  {origin : '*'}
+  cors: { origin: "*" },
 });
 const port = process.env.PORT || 3000;
 
@@ -15,10 +15,10 @@ io.on("connection", (socket) => {
   socket.on("chat message", function (message) {
     io.emit("Serverlog", message);
     // if(message.receiver !=""|| message.receiver !=undefined || message.receiver !=null){
-      io.emit("chat message" +message.receiver_SubID, message);
-      // io.emit("chat message", message);
+    io.emit("chat message" + message.receiver, message);
+    // io.emit("chat message", message);
     // }else{
-     //io.emit("Serverlog", "message.receiver is not available");
+    //io.emit("Serverlog", "message.receiver is not available");
     // }
     console.log(message);
     //SendFromUserDataToDB(message);
@@ -42,15 +42,14 @@ io.on("connection", (socket) => {
   });
 
   socket.on("join-chat", function (Room) {
-     socket.join(Room.ID);
+    socket.join(Room.ID);
     io.to(Room.ID).emit(Room.UserName + "joined to" + Room.Name);
   });
 
   socket.on("leave-chat", function (Room) {
-     socket.leave(Room.ID);
+    socket.leave(Room.ID);
     io.to(Room.ID).emit(Room.UserName + "left" + Room.Name);
   });
-
 
   socket.on("group message", function (groupmessage) {
     io.to(groupmessage.ID).emit("group message", message);
