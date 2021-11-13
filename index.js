@@ -14,19 +14,18 @@ io.on("connection", (socket) => {
   // Listen to chantMessage event sent by client and emit a chatMessage to the client
   socket.on("chat message", function (message) {
     io.emit("Serverlog", message);
-    // if(message.receiver !=""|| message.receiver !=undefined || message.receiver !=null){
-    io.emit("chat message" + message.receiver, message);
-    // io.emit("chat message", message);
-    // }else{
-    //io.emit("Serverlog", "message.receiver is not available");
-    // }
+    if (message.receiver != "" || message.receiver != undefined || message.receiver != null) {
+      io.emit("chat message", message);
+    } else {
+      io.emit("Serverlog", "message.receiver is not available");
+    }
     console.log(message);
     //SendFromUserDataToDB(message);
   });
 
   // Listen to notifyTyping event sent by client and emit a notifyTyping to the client
   socket.on("on typing", function (sender, receiver) {
-    io.to(receiver).emit("on typing", sender, receiver);
+    io.emit("on typing" + receiver, sender, receiver);
   });
 
   // Listen to newUser event sent by client and emit a newUser to the client with new list of online users
@@ -41,18 +40,26 @@ io.on("connection", (socket) => {
     io.emit("Serverlog", onlineUsers);
   });
 
-  socket.on("join-chat", function (Room) {
-    socket.join(Room.ID);
-    io.to(Room.ID).emit(Room.UserName + "joined to" + Room.Name);
+  socket.on("create group", function (Room) {
+    io.emit("Serverlog", Room);
+    socket.join(Room.GroupName + Room.Admin_SubID);
+    // io.to(Room.GroupName + Room.Sub_ID).emit(Room.UserName + "joined to" + Room.GroupName);
+     var group = { GroupID: Room.GroupName + Room.Admin_SubID,};
+     io.emit("create group",group);
+     io.emit("Serverlog", group);
   });
 
-  socket.on("leave-chat", function (Room) {
+  socket.on("leave group", function (Room) {
     socket.leave(Room.ID);
     io.to(Room.ID).emit(Room.UserName + "left" + Room.Name);
   });
 
+  // socket.onq("group chat", function (message) {
+  //   io.to(message.GroupID).emit(message);
+  // });
+
   socket.on("group message", function (groupmessage) {
-    io.to(groupmessage.ID).emit("group message", message);
+    io.in(groupmessage.GroupID).emit("group message" , groupmessage);
   });
 
   socket.on("disconnect", () => {
