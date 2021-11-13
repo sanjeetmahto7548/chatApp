@@ -14,8 +14,12 @@ io.on("connection", (socket) => {
   // Listen to chantMessage event sent by client and emit a chatMessage to the client
   socket.on("chat message", function (message) {
     io.emit("Serverlog", message);
-    if (message.receiver != "" || message.receiver != undefined || message.receiver != null) {
-      io.sockets.to(message.receiver).emit("chat message", message);
+    if (
+      message.receiver != "" ||
+      message.receiver != undefined ||
+      message.receiver != null
+    ) {
+      io.emit("chat message" + message.receiver, message);
     } else {
       io.emit("Serverlog", "message.receiver is not available");
     }
