@@ -19,7 +19,7 @@ io.on("connection", (socket) => {
       message.receiver != undefined ||
       message.receiver != null
     ) {
-      io.emit("chat message" + message.receiver, message);
+      io.to(message.receiver).emit("chat message", message);
     } else {
       io.emit("Serverlog", "message.receiver is not available");
     }
