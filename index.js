@@ -9,21 +9,76 @@ const port = process.env.PORT || 3000;
 
 var onlineUsers = [];
 var chatGroupList = {};
-
-// var con = mysql.createConnection({
-//   'host': 'a2nlmysql25plsk.secureserver.net',
-//   'user': 'vishnu_mys_0327',
-//   'password': '%rK94iv3',
-//   'database': 'phmysql13251786372_'
-// });
-
-// con.connect(function(err) {
-//   if (err) throw err;
-//   console.log("My SQL Server Connected!");
-// });
+var users = [];
 
 io.on("connection", (socket) => {
   console.log("user connected");
+
+  socket.on("KEY_EVENT_USER_CONNECTED", function (userId) {
+    users[userId] = socket.id;
+    var newUser = { ConnectionId: socket.id, Sub_ID: userId };
+    onlineUsers.push(newUser);
+    console.log("Connected user", users);
+    console.log("onlineusers", onlineUsers);
+    io.emit("onlineUsers", onlineUsers);
+  });
+
+  socket.on("KEY_EVENT_PRIVATE_MESSAGE_RECEIVED", function (message, userId) {
+    console.log("User socket id", users[userId]);
+    //socket.join(userId);
+    console.log("User  id", userId);
+    io.to(users[userId]).emit("KEY_EVENT_PRIVATE_MESSAGE_RECEIVED", message);
+    SendFromUserDataToDB(message);
+  });
+
+  socket.on("KEY_EVENT_Group_CREATED", (data) => {
+    console.log("User Group object", data);
+    socket.join(data.groupRoomId);
+
+    chatGroupList[data.roomId] = data;
+
+    io.to(users[data.masterId]).emit("chatGroupList", data);
+    data.member.forEach((item) => {
+      io.to(users[item.Sub_ID]).emit("chatGroupList", data);
+      io.to(users[item.Sub_ID]).emit("KEY_EVENT_Group_CREATED", data);
+    });
+  });
+
+  socket.on("KEY_EVENT_SEND_GROUP_MESSAGE", (data) => {
+    socket.to(data.roomId).emit("KEY_EVENT_SEND_GROUP_MESSAGE", data);
+  });
+
+  // Join group chat
+  socket.on("KEY_EVENT_JOIN_GROUP", (data) => {
+    socket.join(data.roomId);
+    io.to(data.roomId).emit("KEY_EVENT_JOIN_GROUP", {
+      roomId: data.roomId,
+      msg: data.userName + "Joined the group chat",
+      system: true,
+    });
+  });
+
+// Post Data to Dashbord
+  socket.on("KEY_EVENT_POST",(data)=>{
+    io.emit("KEY_EVENT_POST",data);
+  });
+
+
+
+
+
+  socket.on("disconnect", () => {
+    console.log("a user disconnected!");
+    onlineUsers.forEach(function (user, index) {
+      if (user.ConnectionId === socket.id) {
+        onlineUsers.splice(index, 1);
+        io.emit("userIsDisconnected", socket.id);
+        io.emit("onlineUsers", onlineUsers);
+      }
+    });
+  });
+
+  // OLD CODE IS DOWN FOR REFERENCE
 
   // Listen to chantMessage event sent by client and emit a chatMessage to the client
   socket.on("chat message", function (message) {
@@ -38,33 +93,32 @@ io.on("connection", (socket) => {
       io.emit("Serverlog", "message.receiver is not available");
     }
     console.log(message);
-    //SendFromUserDataToDB(message);
+    SendFromUserDataToDB(message);
   });
 
+  socket.on("sendMsgGroup", (data) => {
+    socket.to(data.roomId).emit("receiveMsgGroup", data);
+  });
 
-  socket.on('sendMsgGroup', (data) => {
-    socket.to(data.roomId).emit('receiveMsgGroup', data);
-})
-
-  socket.on('createChatGroup', data => {
+  socket.on("createChatGroup", (data) => {
     socket.join(data.roomId);
     chatGroupList[data.roomId] = data;
-    io.to(data.masterId).emit('chatGroupList',data);
-    data.member.forEach(item => {
-        io.to(item.id).emit('chatGroupList', data)
-        io.to(item.id).emit('createChatGroup', data)
+    io.to(data.masterId).emit("chatGroupList", data);
+    data.member.forEach((item) => {
+      io.to(item.id).emit("chatGroupList", data);
+      io.to(item.id).emit("createChatGroup", data);
     });
-})
-
-// Join group chat
-socket.on('joinChatGroup', data => {
-  socket.join(data.info.roomId);
-  io.to(data.info.roomId).emit('chatGrSystemNotice', {
-      roomId: data.info.roomId,
-      msg: data.userName +'Joined the group chat',
-      system: true
   });
-})
+
+  // Join group chat
+  socket.on("joinChatGroup", (data) => {
+    socket.join(data.info.roomId);
+    io.to(data.info.roomId).emit("chatGrSystemNotice", {
+      roomId: data.info.roomId,
+      msg: data.userName + "Joined the group chat",
+      system: true,
+    });
+  });
 
   // Listen to notifyTyping event sent by client and emit a notifyTyping to the client
   socket.on("on typing", function (sender, receiver) {
@@ -87,9 +141,9 @@ socket.on('joinChatGroup', data => {
     io.emit("Serverlog", Room);
     socket.join(Room.GroupName + Room.Admin_SubID);
     // io.to(Room.GroupName + Room.Sub_ID).emit(Room.UserName + "joined to" + Room.GroupName);
-     var group = { GroupID: Room.GroupName + Room.Admin_SubID,};
-     io.emit("create group",group);
-     io.emit("Serverlog", group);
+    var group = { GroupID: Room.GroupName + Room.Admin_SubID };
+    io.emit("create group", group);
+    io.emit("Serverlog", group);
   });
 
   socket.on("leave group", function (Room) {
@@ -102,56 +156,29 @@ socket.on('joinChatGroup', data => {
   // });
 
   socket.on("group message", function (groupmessage) {
-    io.in(groupmessage.GroupID).emit("group message" , groupmessage);
-  });
-
-  socket.on("disconnect", () => {
-    console.log("a user disconnected!");
-    onlineUsers.forEach(function (user, index) {
-      if (user.ConnectionId === socket.id) {
-        onlineUsers.splice(index, 1);
-        io.emit("userIsDisconnected", socket.id);
-        io.emit("onlineUsers", onlineUsers);
-      }
-    });
+    io.in(groupmessage.GroupID).emit("group message", groupmessage);
   });
 });
 
 function SendFromUserDataToDB(messagedata) {
-  console.log("data:" + messagedata);
+  console.log("data:", messagedata);
   const data = {
-    UserID: 1,
-    EndUserID: 1004,
-    MessageDetails: messagedata.text,
-    Direction: 1,
-  };
-
-  axios
-    .post("http://lifexapp.com/api/UploadSentMessage", data)
-    .then((res) => {
-      console.log(`Status: ${res.status}`);
-      console.log("Body: ", res.data);
-      SendToUserDataToDB(messagedata);
-    })
-    .catch((err) => {
-      console.error(err);
-    });
-}
-
-function SendToUserDataToDB(messagedata) {
-  console.log("data:" + messagedata);
-  const data = {
-    UserID: 1004,
-    EndUserID: 1,
-    MessageDetails: messagedata.text,
+    RoomId: messagedata.RoomId,
+    From_UserID: messagedata.sender,
+    From_UserName: messagedata.sender_Username,
+    To_UserID: messagedata.receiver,
+    To_UserName: messagedata.receiver_Username,
+    From_Msg: messagedata.text,
+    To_Msg: "",
     Direction: 2,
   };
 
   axios
-    .post("http://lifexapp.com/api/UploadSentMessage", data)
+    .post("http://localhost:5678/UploadSentPrivateMessage", data)
     .then((res) => {
       console.log(`Status: ${res.status}`);
       console.log("Body: ", res.data);
+      // SendToUserDataToDB(messagedata);
     })
     .catch((err) => {
       console.error(err);
