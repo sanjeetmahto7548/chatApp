@@ -31,12 +31,13 @@ io.on("connection", (socket) => {
     onlineUsers.push(newUser);
     console.log("User join TOPICID ", userId);
     socket.join(userId);
+    io.emit("serverlog","conectteded user",userId);
   });
 
   socket.on("KEY_EVENT_SEND_TOPIC_CHAT_MESSAGE", (data) => {
     console.log("User Group sending msg object", data);
     console.log("User Group sending msg object", data.topicID);
-
+    io.emit("serverlog","KEY_EVENT_SEND_TOPIC_CHAT_MESSAGE Server before",data);
     if (data.type == "group") {
       io.to(data.Admin_SubID).emit("KEY_EVENT_SEND_TOPIC_CHAT_MESSAGE", data);
       data.Members.forEach((item) => {
