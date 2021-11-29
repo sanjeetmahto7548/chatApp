@@ -25,6 +25,7 @@ io.on("connection", (socket) => {
     console.log("Connected user", users);
     console.log("onlineusers", onlineUsers);
     io.emit("onlineUsers", onlineUsers);
+    
     socket.join(userId);
   });
 
