@@ -3,7 +3,7 @@ const httpServer = require("http").createServer(app);
 const axios = require("axios");
 //const mysql = require('mysql');
 const io = require("socket.io")(httpServer, {
-  cors: { origin: "*" },
+  cors: { origin: "http://localhost:4200/" },
 });
 const port = process.env.PORT || 3000;
 
