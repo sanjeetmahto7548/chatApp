@@ -94,6 +94,7 @@ io.on("connection", (socket) => {
     // });
     data.Members.forEach((item) => {
       // io.to(item.topicID).emit("chatGroupList", data);
+      
       io.to(item.topicID).emit("KEY_EVENT_Group_CREATED", data);
     });
   });
