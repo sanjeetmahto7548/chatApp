@@ -21,8 +21,54 @@ io.on("connection", (socket) => {
     console.log("Connected user", users);
     console.log("onlineusers", onlineUsers);
     io.emit("onlineUsers", onlineUsers);
+    socket.join(userId);
   });
 
+  // Join Single chat Subscribe
+  socket.on("KEY_EVENT_JOIN_TOPICID", (userId) => {
+    users[userId] = socket.id;
+    var newUser = { ConnectionId: socket.id, Sub_ID: userId };
+    onlineUsers.push(newUser);
+    console.log("User join TOPICID ", userId);
+    socket.join(userId);
+  });
+
+  socket.on("KEY_EVENT_SEND_TOPIC_CHAT_MESSAGE", (data) => {
+    console.log("User Group sending msg object", data);
+    console.log("User Group sending msg object", data.topicID);
+
+    if (data.type == "group") {
+      io.to(data.Admin_SubID).emit("KEY_EVENT_SEND_TOPIC_CHAT_MESSAGE", data);
+      data.Members.forEach((item) => {
+        console.log("User join TOPIC users socket id", users[item.topicID]);
+        io.to(item.topicID).emit("KEY_EVENT_SEND_TOPIC_CHAT_MESSAGE", data);
+      });
+    }
+    else{
+      io.to(data.topicID).emit("KEY_EVENT_SEND_TOPIC_CHAT_MESSAGE", data);
+    }
+  
+    
+  });
+
+  socket.on("KEY_EVENT_SEND_TOPIC_DASHBOARD_MESSAGE", (data) => {
+    console.log("User Dashbord post  object", data);
+    io.emit("KEY_EVENT_SEND_TOPIC_DASHBOARD_MESSAGE", data);
+    // data.Members.forEach((item) => {
+    //   // io.to(item.topicID).emit("KEY_EVENT_SEND_TOPIC_DASHBOARD_MESSAGE", data);
+    // });
+  });
+
+  socket.on("KEY_EVENT_SEND_TOPIC_COMMENTS_MESSAGE", (data) => {
+    console.log("User Dashbord post comment  object", data);
+    io.emit("KEY_EVENT_SEND_TOPIC_COMMENTS_MESSAGE", data);
+    // data.Members.forEach((item) => {
+    //   // io.to(item.topicID).emit("KEY_EVENT_SEND_TOPIC_COMMENTS_MESSAGE ", data);
+    // });
+  });
+
+  // Below code is past 
+  // Modified latest Code is Above
   socket.on("KEY_EVENT_PRIVATE_MESSAGE_RECEIVED", function (message, userId) {
     console.log("User socket id", users[userId]);
     //socket.join(userId);
@@ -33,14 +79,17 @@ io.on("connection", (socket) => {
 
   socket.on("KEY_EVENT_Group_CREATED", (data) => {
     console.log("User Group object", data);
-    socket.join(data.groupRoomId);
-
-    chatGroupList[data.roomId] = data;
-
-    io.to(users[data.masterId]).emit("chatGroupList", data);
-    data.member.forEach((item) => {
-      io.to(users[item.Sub_ID]).emit("chatGroupList", data);
-      io.to(users[item.Sub_ID]).emit("KEY_EVENT_Group_CREATED", data);
+    // socket.join(data.groupRoomId);
+    // chatGroupList[data.roomId] = data;
+    // io.to(users[data.masterId]).emit("chatGroupList", data);
+    io.to(data.topicID).emit("KEY_EVENT_Group_CREATED", data);  
+      // data.member.forEach((item) => {
+    //   io.to(users[item.Sub_ID]).emit("chatGroupList", data);
+    //   io.to(users[item.Sub_ID]).emit("KEY_EVENT_Group_CREATED", data);
+    // });
+    data.Members.forEach((item) => {
+      // io.to(item.topicID).emit("chatGroupList", data);
+      io.to(item.topicID).emit("KEY_EVENT_Group_CREATED", data);
     });
   });
 
@@ -49,23 +98,20 @@ io.on("connection", (socket) => {
   });
 
   // Join group chat
-  socket.on("KEY_EVENT_JOIN_GROUP", (data) => {
-    socket.join(data.roomId);
-    io.to(data.roomId).emit("KEY_EVENT_JOIN_GROUP", {
-      roomId: data.roomId,
-      msg: data.userName + "Joined the group chat",
-      system: true,
-    });
+  //socket.on("KEY_EVENT_JOIN_GROUP", (data) => {
+    // socket.join(data.roomId);
+    // io.to(data.roomId).emit("KEY_EVENT_JOIN_GROUP", {
+    //   roomId: data.roomId,
+    //   msg: data.userName + "Joined the group chat",
+    //   system: true,
+    // });
+   // io.to(data.topicID).emit("KEY_EVENT_JOIN_GROUP",data);
+  //});
+
+  // Post Data to Dashbord
+  socket.on("KEY_EVENT_POST", (data) => {
+    io.emit("KEY_EVENT_POST", data);
   });
-
-// Post Data to Dashbord
-  socket.on("KEY_EVENT_POST",(data)=>{
-    io.emit("KEY_EVENT_POST",data);
-  });
-
-
-
-
 
   socket.on("disconnect", () => {
     console.log("a user disconnected!");
