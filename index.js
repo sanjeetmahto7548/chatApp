@@ -43,7 +43,7 @@ io.on("connection", (socket) => {
     console.log("User Group sending msg object", data.topicID);
     io.emit("serverlog","KEY_EVENT_SEND_TOPIC_CHAT_MESSAGE Server before",data);
     if (data.type == "group") {
-      io.to(data.Admin_SubID).emit("KEY_EVENT_SEND_TOPIC_CHAT_MESSAGE", data);
+     // io.to(data.Admin_SubID).emit("KEY_EVENT_SEND_TOPIC_CHAT_MESSAGE", data);
       data.Members.forEach((item) => {
         console.log("User join TOPIC users socket id", users[item.topicID]);
         io.to(item.topicID).emit("KEY_EVENT_SEND_TOPIC_CHAT_MESSAGE", data);
