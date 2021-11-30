@@ -87,7 +87,7 @@ io.on("connection", (socket) => {
     // socket.join(data.groupRoomId);
     // chatGroupList[data.roomId] = data;
     // io.to(users[data.masterId]).emit("chatGroupList", data);
-    io.to(data.topicID).emit("KEY_EVENT_Group_CREATED", data);  
+    //io.to(data.topicID).emit("KEY_EVENT_Group_CREATED", data);  
       // data.member.forEach((item) => {
     //   io.to(users[item.Sub_ID]).emit("chatGroupList", data);
     //   io.to(users[item.Sub_ID]).emit("KEY_EVENT_Group_CREATED", data);
