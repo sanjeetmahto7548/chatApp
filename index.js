@@ -19,6 +19,7 @@ io.on("connection", (socket) => {
   console.log("user connected");
 
   socket.on("KEY_EVENT_USER_CONNECTED", function (userId) {
+
     users[userId] = socket.id;
     var newUser = { ConnectionId: socket.id, Sub_ID: userId };
     onlineUsers.push(newUser);
@@ -26,7 +27,15 @@ io.on("connection", (socket) => {
     console.log("onlineusers", onlineUsers);
     io.emit("onlineUsers", onlineUsers);
     socket.join(userId);
+    
   });
+
+  // Follow Request subscribe
+socket.on("KEY_EVENT_FOLLWERS",(data)=>{
+  data.Members.forEach((item) => {
+    io.to(item.topicID).emit("KEY_EVENT_FOLLWERS", data);
+  });
+})
 
   // Join Single chat Subscribe
   socket.on("KEY_EVENT_JOIN_TOPICID", (userId) => {
@@ -51,17 +60,16 @@ io.on("connection", (socket) => {
     }
     else{
       io.to(data.topicID).emit("KEY_EVENT_SEND_TOPIC_CHAT_MESSAGE", data);
-    }
-  
-    
+    }    
   });
 
   socket.on("KEY_EVENT_SEND_TOPIC_DASHBOARD_MESSAGE", (data) => {
-    console.log("User Dashbord post  object", data);
-    io.emit("KEY_EVENT_SEND_TOPIC_DASHBOARD_MESSAGE", data);
-    // data.Members.forEach((item) => {
-    //   // io.to(item.topicID).emit("KEY_EVENT_SEND_TOPIC_DASHBOARD_MESSAGE", data);
-    // });
+
+   // io.emit("KEY_EVENT_SEND_TOPIC_DASHBOARD_MESSAGE", data);
+    data.Members.forEach((item) => {
+       console.log("User Dashbord post  object", data);
+       io.to(item.topicID).emit("KEY_EVENT_SEND_TOPIC_DASHBOARD_MESSAGE", data);
+    });
   });
 
   socket.on("KEY_EVENT_SEND_TOPIC_COMMENTS_MESSAGE", (data) => {
