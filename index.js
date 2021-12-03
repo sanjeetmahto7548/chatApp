@@ -30,11 +30,13 @@ io.on("connection", (socket) => {
     
   });
 
-  
+
   // Follow Request subscribe
-socket.on("KEY_EVENT_FOLLWERS",(data)=>{
+socket.on("KEY_EVENT_FOLLOWERS",(data)=>{
+  io.emit("serverlog","KEY_EVENT_FOLLOWERS",data);
   data.Members.forEach((item) => {
-    io.to(item.topicID).emit("KEY_EVENT_FOLLWERS", data);
+    io.to(item.topicID).emit("KEY_EVENT_FOLLOWERS", data);
+    io.emit("serverlog","KEY_EVENT_FOLLOWERS Members",data);
   });
 })
 
