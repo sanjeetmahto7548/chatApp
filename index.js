@@ -35,6 +35,7 @@ io.on("connection", (socket) => {
 socket.on("KEY_EVENT_FOLLOWERS",(data)=>{
   io.emit("serverlog","KEY_EVENT_FOLLOWERS",data);
   data.Members.forEach((item) => {
+    console.log("KEY_EVENT_FOLLOWERS",data);
     io.to(item.topicID).emit("KEY_EVENT_FOLLOWERS", data);
     io.emit("serverlog","KEY_EVENT_FOLLOWERS Members",data);
   });
