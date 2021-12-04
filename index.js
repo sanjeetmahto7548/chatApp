@@ -30,7 +30,6 @@ io.on("connection", (socket) => {
     
   });
 
-
   // Follow Request subscribe
 socket.on("KEY_EVENT_FOLLOWERS",(data)=>{
   io.emit("serverlog","KEY_EVENT_FOLLOWERS",data);
