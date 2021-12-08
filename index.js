@@ -94,7 +94,7 @@ socket.on("KEY_EVENT_FOLLOWERS",(data)=>{
 
   socket.on("KEY_EVENT_SEND_TOPIC_LIKES", (data) => {
     console.log("User Dashbord post reply comment  object", data);
-    io.emit("KEY_EVENT_SEND_TOPIC_REPLY_COMMENTS_MESSAGE", data);
+    io.emit("KEY_EVENT_SEND_TOPIC_LIKES", data);
     // data.Members.forEach((item) => {
     //    io.to(item.topicID).emit("KEY_EVENT_SEND_TOPIC_LIKES ", data);
     // });
