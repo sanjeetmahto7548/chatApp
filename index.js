@@ -103,7 +103,7 @@ socket.on("KEY_EVENT_FOLLOWERS",(data)=>{
 
   socket.on("KEY_EVENT_SEND_TOPIC_LIKES_COUNT", (data) => {
     console.log("User Dashbord post reply comment  object", data);
-     io.emit("KEY_EVENT_SEND_TOPIC_LIKES", data);
+     io.emit("KEY_EVENT_SEND_TOPIC_LIKES_COUNT", data);
     //socket.broadcast.emit('KEY_EVENT_SEND_TOPIC_LIKES_COUNT',data);
   });
 
