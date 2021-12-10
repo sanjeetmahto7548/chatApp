@@ -5,8 +5,8 @@ const axios = require("axios");
 const io = require("socket.io")(httpServer, {
   cors: {
     origin: "http://localhost:4200",
-    credentials: true
-  }
+    credentials: true,
+  },
   // cors: { origin: "*" },
 });
 const port = process.env.PORT || 3000;
@@ -19,7 +19,6 @@ io.on("connection", (socket) => {
   console.log("user connected");
 
   socket.on("KEY_EVENT_USER_CONNECTED", function (userId) {
-
     users[userId] = socket.id;
     var newUser = { ConnectionId: socket.id, Sub_ID: userId };
     onlineUsers.push(newUser);
@@ -27,18 +26,17 @@ io.on("connection", (socket) => {
     console.log("onlineusers", onlineUsers);
     io.emit("onlineUsers", onlineUsers);
     socket.join(userId);
-    
   });
 
   // Follow Request subscribe
-socket.on("KEY_EVENT_FOLLOWERS",(data)=>{
-  io.emit("serverlog","KEY_EVENT_FOLLOWERS",data);
-  data.Members.forEach((item) => {
-    console.log("KEY_EVENT_FOLLOWERS",data);
-    io.to(item.topicID).emit("KEY_EVENT_FOLLOWERS", data);
-    io.emit("serverlog","KEY_EVENT_FOLLOWERS Members",data);
+  socket.on("KEY_EVENT_FOLLOWERS", (data) => {
+    io.emit("serverlog", "KEY_EVENT_FOLLOWERS", data);
+    data.Members.forEach((item) => {
+      console.log("KEY_EVENT_FOLLOWERS", data);
+      io.to(item.topicID).emit("KEY_EVENT_FOLLOWERS", data);
+      io.emit("serverlog", "KEY_EVENT_FOLLOWERS Members", data);
+    });
   });
-})
 
   // Join Single chat Subscribe
   socket.on("KEY_EVENT_JOIN_TOPICID", (userId) => {
@@ -47,31 +45,33 @@ socket.on("KEY_EVENT_FOLLOWERS",(data)=>{
     onlineUsers.push(newUser);
     console.log("User join TOPICID ", userId);
     socket.join(userId);
-    io.emit("serverlog","conectteded user",userId);
+    io.emit("serverlog", "conectteded user", userId);
   });
 
   socket.on("KEY_EVENT_SEND_TOPIC_CHAT_MESSAGE", (data) => {
     console.log("User Group sending msg object", data);
     console.log("User Group sending msg object", data.topicID);
-    io.emit("serverlog","KEY_EVENT_SEND_TOPIC_CHAT_MESSAGE Server before",data);
+    io.emit(
+      "serverlog",
+      "KEY_EVENT_SEND_TOPIC_CHAT_MESSAGE Server before",
+      data
+    );
     if (data.type == "group") {
-     // io.to(data.Admin_SubID).emit("KEY_EVENT_SEND_TOPIC_CHAT_MESSAGE", data);
+      // io.to(data.Admin_SubID).emit("KEY_EVENT_SEND_TOPIC_CHAT_MESSAGE", data);
       data.Members.forEach((item) => {
         console.log("User join TOPIC users socket id", users[item.topicID]);
         io.to(item.topicID).emit("KEY_EVENT_SEND_TOPIC_CHAT_MESSAGE", data);
       });
-    }
-    else{
+    } else {
       io.to(data.topicID).emit("KEY_EVENT_SEND_TOPIC_CHAT_MESSAGE", data);
-    }    
+    }
   });
 
   socket.on("KEY_EVENT_SEND_TOPIC_DASHBOARD_MESSAGE", (data) => {
-
-   // io.emit("KEY_EVENT_SEND_TOPIC_DASHBOARD_MESSAGE", data);
+    // io.emit("KEY_EVENT_SEND_TOPIC_DASHBOARD_MESSAGE", data);
     data.Members.forEach((item) => {
-       console.log("User Dashbord post  object", data);
-       io.to(item.topicID).emit("KEY_EVENT_SEND_TOPIC_DASHBOARD_MESSAGE", data);
+      console.log("User Dashbord post  object", data);
+      io.to(item.topicID).emit("KEY_EVENT_SEND_TOPIC_DASHBOARD_MESSAGE", data);
     });
   });
 
@@ -83,7 +83,6 @@ socket.on("KEY_EVENT_FOLLOWERS",(data)=>{
     // });
   });
 
-  
   socket.on("KEY_EVENT_SEND_TOPIC_REPLY_COMMENTS_MESSAGE", (data) => {
     console.log("User Dashbord post reply comment  object", data);
     io.emit("KEY_EVENT_SEND_TOPIC_REPLY_COMMENTS_MESSAGE", data);
@@ -94,7 +93,7 @@ socket.on("KEY_EVENT_FOLLOWERS",(data)=>{
 
   socket.on("KEY_EVENT_SEND_TOPIC_LIKES", (data) => {
     console.log("User Dashbord post reply comment  object", data);
-     io.emit("KEY_EVENT_SEND_TOPIC_LIKES", data);
+    io.emit("KEY_EVENT_SEND_TOPIC_LIKES", data);
     // socket.broadcast.emit('KEY_EVENT_SEND_TOPIC_LIKES',data);
     // data.Members.forEach((item) => {
     //    io.to(item.topicID).emit("KEY_EVENT_SEND_TOPIC_LIKES ", data);
@@ -103,7 +102,7 @@ socket.on("KEY_EVENT_FOLLOWERS",(data)=>{
 
   socket.on("KEY_EVENT_SEND_TOPIC_LIKES_COUNT", (data) => {
     console.log("User Dashbord post reply comment  object", data);
-     io.emit("KEY_EVENT_SEND_TOPIC_LIKES_COUNT", data);
+    io.emit("KEY_EVENT_SEND_TOPIC_LIKES_COUNT", data);
     //socket.broadcast.emit('KEY_EVENT_SEND_TOPIC_LIKES_COUNT',data);
   });
 
@@ -112,21 +111,23 @@ socket.on("KEY_EVENT_FOLLOWERS",(data)=>{
     // socket.join(data.groupRoomId);
     // chatGroupList[data.roomId] = data;
     // io.to(users[data.masterId]).emit("chatGroupList", data);
-    //io.to(data.topicID).emit("KEY_EVENT_Group_CREATED", data);  
-      // data.member.forEach((item) => {
+    //io.to(data.topicID).emit("KEY_EVENT_Group_CREATED", data);
+    // data.member.forEach((item) => {
     //   io.to(users[item.Sub_ID]).emit("chatGroupList", data);
     //   io.to(users[item.Sub_ID]).emit("KEY_EVENT_Group_CREATED", data);
     // });
     data.Members.forEach((item) => {
-      // io.to(item.topicID).emit("chatGroupList", data);     
+      // io.to(item.topicID).emit("chatGroupList", data);
       io.to(item.topicID).emit("KEY_EVENT_Group_CREATED", data);
     });
   });
 
+  socket.on("KEY_EVENT_JOIN_SDG_CHAT", (data) => {
+    socket.join(data);
+  });
 
-  // Post Data to Dashbord
-  socket.on("KEY_EVENT_POST", (data) => {
-    io.emit("KEY_EVENT_POST", data);
+  socket.on("KEY_EVENT_SEND_SDG_CHAT", (data) => {
+    io.to(data.SDGGroupID).emit("KEY_EVENT_SEND_TOPIC_CHAT_MESSAGE", data);
   });
 
   socket.on("disconnect", () => {
@@ -139,8 +140,6 @@ socket.on("KEY_EVENT_FOLLOWERS",(data)=>{
       }
     });
   });
-
 });
-
 
 httpServer.listen(port, () => console.log(`listening on port ${port}`));
