@@ -108,14 +108,6 @@ io.on("connection", (socket) => {
 
   socket.on("KEY_EVENT_Group_CREATED", (data) => {
     console.log("User Group object", data);
-    // socket.join(data.groupRoomId);
-    // chatGroupList[data.roomId] = data;
-    // io.to(users[data.masterId]).emit("chatGroupList", data);
-    //io.to(data.topicID).emit("KEY_EVENT_Group_CREATED", data);
-    // data.member.forEach((item) => {
-    //   io.to(users[item.Sub_ID]).emit("chatGroupList", data);
-    //   io.to(users[item.Sub_ID]).emit("KEY_EVENT_Group_CREATED", data);
-    // });
     data.Members.forEach((item) => {
       // io.to(item.topicID).emit("chatGroupList", data);
       io.to(item.topicID).emit("KEY_EVENT_Group_CREATED", data);
@@ -127,7 +119,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("KEY_EVENT_SEND_SDG_CHAT", (data) => {
-    io.to(data.SDGGroupID).emit("KEY_EVENT_SEND_TOPIC_CHAT_MESSAGE", data);
+    io.to(data.SDGGroupID).emit("KEY_EVENT_SEND_SDG_CHAT", data);
   });
 
   socket.on("disconnect", () => {
@@ -140,6 +132,7 @@ io.on("connection", (socket) => {
       }
     });
   });
+
 });
 
 httpServer.listen(port, () => console.log(`listening on port ${port}`));
