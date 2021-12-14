@@ -119,7 +119,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("KEY_EVENT_SEND_SDG_CHAT", (data) => {
-    io.to(data.SDGGroupID).emit("KEY_EVENT_SEND_SDG_CHAT", data);
+    io.to(data.SDG_SubID).emit("KEY_EVENT_SEND_SDG_CHAT", data);
   });
 
   socket.on("disconnect", () => {
